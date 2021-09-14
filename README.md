@@ -40,14 +40,13 @@ style.css(遊戲大廳CSS)
 
 docs(dir)
 
-&nbsp;|_架構設計.ppt
+&emsp;|_架構設計.ppt
 
 game(dir)
 
-&nbsp;|_index.js (遊戲site(房間JS))
+&emsp;|_index.js (遊戲site(房間JS))
 
-&nbsp;|_index.html(遊戲site(房間HTML))
-
-&nbsp;|_style.css(房間CSS)
+&emsp;|_index.html(遊戲site(房間HTML))
+&emsp;|_style.css(房間CSS)
 
 
