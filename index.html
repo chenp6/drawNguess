@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script>
+        window.onload = function() {
+            //p.s.  載入完成前顯示loading...
+            //p.s.  '.room_selector'在window完整載入前為display:none (style.css)
+            $('#loadingBar').remove();
+            $('.room_selector').show();
+        }
+    </script>
+
+</head>
+
+<body>
+    <div class="big_container">
+        <div class="mid_container">
+            <div class="room_window">
+                <div class="room_container" id="roomContainer">
+                    <b id="loadingBar">loading...</b>
+                    <!--room_selector option的設置-->
+                    <!--index.js(function roomBtnSetting=>設定select option具<button>樣式且select時能切換style)-->
+                    <!--style.css(選擇(.room.on)與不選擇(.room)的style內容)-->
+                    <select name="text" class="room_selector">
+                        <option>
+                            <button value="custom" class="room" >
+                                <!-- 自建房間: <input class='room_input' id='roomNameInput' placeholder='自建房間'>  -->
+                                <!-- 一般房間: <div class='room_input'>" + name + "</div>  -->
+                                <div class="counter_container">
+                                    <img srcset="img/avatar1x.png 1x, img/avatar1x.png 2x,img/avatar1x.png 3x"
+                                        src="img/avatar1x.png">
+                                    <div class="counter">0/6</div>
+                                </div>
+                            </button>
+                        </option> 
+                    </select>
+                </div>
+            </div>
+            <div class="login_container">
+                <input type="text" name="username" class="username_input" id="usernameInput" placeholder="Enter your name">
+                <button class="loginBtn" onclick="enterRoom()">進入房間</button>
+            </div>
+        </div>
+    </div>
+    <script src="node_modules/socket.io/client-dist/socket.io.js"></script>
+    <script src="index.js"></script>
+
+
+</body>
+
+</html>

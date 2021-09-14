@@ -1,0 +1,68 @@
+body {
+    font-family: monospace;
+    min-width: 600px;
+}
+
+.tool_bar {
+    border: 0px;
+    height: 50px;
+    width: 565px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+}
+
+.palatte {
+    float: left;
+    width: 215px;
+}
+
+.palatte button {
+    border: 1px solid black;
+    padding: 10px;
+    text-decoration: none;
+    display: inline-block;
+    margin: 1px;
+}
+
+.color_selector {
+    float: left;
+    width: 45px;
+}
+
+.weight_scroller {
+    float: left;
+    width: 133px;
+}
+
+.undo_btn {
+    float: left;
+    width: 45px;
+    background-color: white;
+}
+
+.undo_btn img {
+    width: 22px;
+}
+
+.clock {
+    float: left;
+    background-color: rgb(102, 162, 216);
+    border-radius: 10px;
+    padding: 10px;
+    width: 33px;
+    font-size: 30px;
+    text-align: center;
+}
+
+.game_main {
+    border: 1px solid black;
+    border-radius: 10px;
+    width: 560px;
+    height: 460px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

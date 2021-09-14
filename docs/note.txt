@@ -1,0 +1,10 @@
+line = [2,3,3]
+step = [1,4,7]
+
+step = [2,5,8]
+刪掉 234
+splice(5,3)
+splice((4+1),(7-4))
+if(last > 0)
+
+splice(step[last-1],step[last] - step[last-1])

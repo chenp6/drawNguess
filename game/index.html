@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+
+<head>
+    <title>一筆鴉鴉</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" type="text/css" href="style.css">
+
+</head>
+
+<body>
+    <div>
+        <input id="answerInput" type="text" value="" readOnly="true" name="answer" placeholder="三個字">
+        <button onclick="guessAnswer()">送出</button>
+    </div>
+    <p>
+        <span>得分:</span>
+        <span id="score">0</span>
+    </p>
+    <p id="tempGuess">等待猜測者猜測。。。</p>
+    <p id="answerShow">&nbsp;&nbsp;</p>
+    <p id="test"></p>
+    <div class="tool_bar">
+        <div class='palatte'>
+            <button style="background-color: #ffffff;" onclick="setStrokeColor('#ffffff')"></button>
+            <button style="background-color: #000000;" onclick="setStrokeColor('#000000')"></button>
+            <button style="background-color: #a5a5a5;" onclick="setStrokeColor('#a5a5a5')"></button>
+            <button style="background-color: #c00000;" onclick="setStrokeColor('#c00000')"></button>
+            <button style="background-color: #ff0000;" onclick="setStrokeColor('#ff0000')"></button>
+            <button style="background-color: #ed7d31;" onclick="setStrokeColor('#ed7d31')"></button>
+            <button style="background-color: #ffcc00;" onclick="setStrokeColor('#ffcc00')"></button>
+            <br>
+            <button style="background-color: #00ff00;" onclick="setStrokeColor('#00ff00')"></button>
+            <button style="background-color: #92d050;" onclick="setStrokeColor('#92d050')"></button>
+            <button style="background-color: #00b050;" onclick="setStrokeColor('#00b050')"></button>
+            <button style="background-color: #00b0f0;" onclick="setStrokeColor('#00b0f0')"></button>
+            <button style="background-color: #0083c0;" onclick="setStrokeColor('#0083c0')"></button>
+            <button style="background-color: #002060;" onclick="setStrokeColor('#002060')"></button>
+            <button style="background-color: #7030a0;" onclick="setStrokeColor('#7030a0')"></button>
+        </div>
+        <input class=" color_selector" id="colorSelector" type="color" value="#000000" oninput="setStrokeColor(this.value);">
+        <div class="weight_scroller">
+            <input type="range" name="weightValue" min="1" max="20" value="4" onchange="setStrokeWeight(this.value);">
+            <div style="text-align: center;">筆刷大小:<b id="weightValue" style="font-size: large;">4</b></div>
+        </div>
+        <button class="undo_btn" onclick="undoBtnClick()">
+            <img src="img/undo.png">
+        </button>
+        <div class="clock" id="clock">
+            0
+        </div>
+    </div>
+    <main class="game_main" id="gameMain"></main>
+    <script src="JavaScript/p5.min.js"></script>
+    <script src="../node_modules/socket.io/client-dist/socket.io.js"></script>
+    <script src="index.js"></script>
+</body>
+
+</html>

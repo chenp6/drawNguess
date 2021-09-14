@@ -1,0 +1,115 @@
+body {
+    background-color: #32B3C4;
+    font-family: monospace;
+}
+
+#loadingBar {
+    margin-left: 10px;
+    text-align: center;
+    font-size: 3vw;
+}
+
+.room_selector {
+    display: none;
+}
+
+.big_container {
+    height: 90vh;
+    width: 90vw;
+    margin-left: 3vw;
+    margin-right: 3vw;
+    margin-top: 5vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 20px;
+    background: #D1EFF3;
+}
+
+.mid_container {
+    height: 85vh;
+    width: 80vw;
+}
+
+.room_window {
+    height: 70vh;
+    width: 80vw;
+    border-radius: 20px;
+    overflow-y: scroll;
+    /* display: flex;
+    align-items: center;
+    justify-content: center; */
+    background: white;
+}
+
+.room {
+    border: 0.3vw solid white;
+    border-radius: 1vw;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    background-color: #6DD9FF;
+    padding: 1vw;
+    margin: 2vw;
+    float: left;
+}
+
+.room.on {
+    border: 0.3vw solid black;
+}
+
+.room_input {
+    border-radius: 5px;
+    border: 0px;
+    padding: 0px;
+    width: 15vw;
+    height: 6vh;
+    line-height: 6vh;
+    text-align: center;
+    font-size: 2vw;
+    margin-right: 1vw;
+    background-color: white;
+}
+
+.counter {
+    border-radius: 20px;
+    background-color: white;
+}
+
+.login_container {
+    display: flex;
+    justify-content: center;
+    margin-top: 3vh;
+    height: 10vh;
+    gap: 3vw;
+}
+
+.loginBtn {
+    border: #6da7ff solid 2px;
+    border-radius: 5px;
+    width: 20vw;
+    height: auto;
+    font-size: 3vw;
+    background-color: #6DD9FF;
+}
+
+.username_input {
+    border: #2E75B6 solid 10px;
+    width: 38vw;
+    border-radius: 5px;
+    font-size: 2.5vw;
+}
+
+
+/* button.btn {
+    display: inline-block;
+    border: 2px solid #ccc;
+    margin-right: 5px;
+    padding: 2px 5px;
+    cursor: pointer;
+}
+
+button.btn.on {
+    background-color: #777;
+    color: white;
+} */
