@@ -1,0 +1,37 @@
+#room_window {
+    height: 70vh;
+    width: 80vw;
+    border-radius: 20px;
+    overflow-y: scroll;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #1b7988;
+}
+
+#room_box {
+    height: 70vh;
+    width: 60vw;
+    border-radius: 20px;
+    margin-left: 2vw;
+    background: #1b7988;
+}
+
+#loadingBar {
+    margin-left: 10px;
+    text-align: center;
+    font-size: 3vw;
+}
+
+
+/* .room_window {
+  height: 70vh;
+  width: 80vw;
+  border-radius: 20px;
+  overflow-y: scroll;
+  /* display: flex;
+align-items: center;
+justify-content: center; 
+  background: white;
+} 
+*/

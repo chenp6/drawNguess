@@ -1,0 +1,39 @@
+.room {
+    border: 0.3vw solid #658f94;
+    border-radius: 1vw;
+    box-shadow: 1px 1px 10px 1px #658f94;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    background-color: #6DD9FF;
+    padding: 1vw;
+    margin: 2vw;
+    float: left;
+}
+
+input[type="radio"]:checked+span {
+    border: 0.3vw solid black;
+}
+
+.room_input {
+    border-radius: 5px;
+    border: 0px;
+    padding: 2px;
+    width: 15vw;
+    height: 8vh;
+    line-height: 6vh;
+    text-align: center;
+    font-size: 2vw;
+    margin-right: 1vw;
+    background-color: white;
+}
+
+input[type="radio"] {
+    display: none;
+}
+
+.counter {
+    border-radius: 20px;
+    background-color: white;
+    text-align: center;
+}

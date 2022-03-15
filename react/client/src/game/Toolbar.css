@@ -1,0 +1,27 @@
+.Toolbar {
+    border: 0px;
+    height: 50px;
+    margin-bottom: 10px;
+    display: flex;
+    /* justify-content: space-around; */
+    align-items: center;
+    gap: 15px;
+}
+
+.undo_btn {
+    width: 45px;
+    background-color: white;
+}
+
+.undo_btn img {
+    width: 22px;
+}
+
+.clock {
+    background-color: rgb(102, 162, 216);
+    border-radius: 10px;
+    padding: 10px;
+    width: 33px;
+    font-size: 30px;
+    text-align: center;
+}
