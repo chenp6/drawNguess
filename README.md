@@ -28,7 +28,7 @@
 ## 架構設計
   位於docs/架構設計.ppt
 
-## 檔案位置
+## 檔案位置【目前為no-react版本資料，react版本還在更新】
 
 server.js (伺服器JS) 
 
