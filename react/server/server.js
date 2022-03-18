@@ -37,8 +37,6 @@ const answerIndex = new Map(); //roomId => 答案的Index
 const roundTime = new Map(); //roomId => round時間(0~60000毫秒；-1表示計時停止)
 const turnTime = new Map(); //roomId => {turn:turn時間,turnEnd:結束時間，-1表示計時停止}
 
-
-
 //測資 (房間1'idididid1213')
 roomInfo.set('idididid1213', {
     name: '房間1',
@@ -82,9 +80,11 @@ gameIO.on('connection', (socket) => {
             order.push({ id: socket.id, name: username }); //ps:"leave-room"時要刪除此筆資料
             socket.join(roomId);
             if (room.playerCnt < 3) {
-                socket.emit('wait for teammate');
+                waitForTeammate(roomId);
             } else if (room.playerCnt == 3) {
                 startRound(roomId); //達3人後可開始遊戲
+            } else {
+                showCurrentInfo(socket.id, roomId);
             }
         } else {
             socket.emit('full seat');
@@ -99,11 +99,9 @@ gameIO.on('connection', (socket) => {
     socket.on('guess answer', (roomId, guessAnswer) => {
         const correctIndex = answerIndex.get(roomId);
         if (qBank[correctIndex] !== guessAnswer) {
-            socket.broadcast.to(roomId).emit('show guess answer', guessAnswer, false);
-            onWrongAnswer(roomId);
+            onWrongAnswer(roomId, guessAnswer);
         } else {
-            socket.broadcast.to(roomId).emit('show guess answer', qBank[correctIndex], true);
-            onRightAnswer(roomId);
+            onRightAnswer(roomId, guessAnswer);
         }
     });
 
@@ -114,6 +112,14 @@ gameIO.on('connection', (socket) => {
 
 });
 
+function showCurrentInfo(socketId, roomId) {
+    const order = playerOrder.get(roomId);
+    gameIO.to(socketId).emit('update turn order', order);
+
+    gameIO.to(socketId).emit('start new round', order[0].name);
+    showAnswer(socketId, ansIndex); //除猜題者外其他皆須收到答案
+}
+
 function startRound(roomId, currentIndex = null) {
     gameIO.to(roomId).emit('wait new round');
     const ansIndex = randomAnswerIndex(currentIndex);
@@ -121,6 +127,7 @@ function startRound(roomId, currentIndex = null) {
     setTimeout(() => {
         const order = playerOrder.get(roomId);
         if (order && order.length >= 3) {
+            gameIO.to(roomId).emit('start new round', order[0].name);
             initRoundTimer(roomId);
             for (let i = 1; i < order.length; i++) {
                 showAnswer(order[i].id, ansIndex); //除猜題者外其他皆須收到答案
@@ -129,7 +136,7 @@ function startRound(roomId, currentIndex = null) {
             roundTimer(roomId);
             startTurn(roomId);
         } else {
-            gameIO.to(roomId).emit('wait for teammate');
+            waitForTeammate(roomId)
         }
 
     }, 2000);
@@ -140,6 +147,7 @@ function startRound(roomId, currentIndex = null) {
  */
 function roundTimer(roomId) {
     const time = roundTime.get(roomId); //目前時間
+    if (time == undefined) return;
     if (time >= 60000) { //超過60秒(本round結束)，停止計時器
         endRound(roomId);
     } else if (time >= 0) {
@@ -147,9 +155,9 @@ function roundTimer(roomId) {
         //所以time>=0時便會繼續遞迴
         gameIO.to(roomId).emit('update round time', time);
         setTimeout(() => {
-            roundTime.set(roomId, time + 100);
+            roundTime.set(roomId, time + 500);
             roundTimer(roomId);
-        }, 100);
+        }, 500);
     }
 }
 
@@ -164,45 +172,53 @@ function startTurn(roomId) {
         return;
     }
     const playerCnt = roomInfo.get(roomId).playerCnt;
-    const end = leftTime / playerCnt;
+    const end = leftTime / (playerCnt - 1); //繪者人數為所有玩家人數-1
+    //當leftTime只剩下或更少於3秒時，此turn時間為leftTime>>>以3秒作為繪者最低limit
     console.log(leftTime + " " + playerCnt);
-    if (leftTime <= 1000) {
+    let isLast = false;
+    if (leftTime <= 3000) {
+        isLast = true;
         initTurnTimer(roomId, leftTime);
     } else {
         initTurnTimer(roomId, end);
     }
 
     emitNewOrder(roomId);
-    turnTimer(roomId);
+    turnTimer(roomId, isLast);
 }
 
 
 
-function turnTimer(roomId) {
+function turnTimer(roomId, isLastTurn) {
     const round = roundTime.get(roomId);
     const turn = turnTime.get(roomId);
+    if (turn == undefined) {
+        return;
+    }
     const current = turn.current;
     const turnEnd = turn.turnEnd;
     const order = playerOrder.get(roomId);
 
-    if (round == -1 || turn.turnEnd == -1) {
+    if (round == -1 || turn.turnEnd == -1 || round == undefined) {
         //round已停止
         return;
     }
     if (current >= turnEnd) {
-        console.log("here")
+        // console.log("here")
         stopTurnTimer(roomId);
         gameIO.to(order[1].id).emit('update turn time', 0, 1);
-        restartTurn(roomId);
+        if (!isLast) { //若非最後一輪則restartTurn
+            restartTurn(roomId);
+        }
     } else {
         if (order.length >= 3) {
             gameIO.to(order[1].id).emit('update turn time', current, turnEnd);
-            console.log(current + " " + turnEnd);
+            // console.log(current + " " + turnEnd);
         }
         setTimeout(() => {
-            turn.current += 100;
-            turnTimer(roomId);
-        }, 100);
+            turn.current += 500;
+            turnTimer(roomId, isLastTurn);
+        }, 500);
     }
 }
 
@@ -224,34 +240,39 @@ function restartTurn(roomId) {
     startTurn(roomId);
 }
 
-function onRightAnswer(roomId) {
-    const ansIndex = answerIndex.get(roomId);
-    gameIO.to(roomId).emit('right answer', qBank[ansIndex]);
+function onRightAnswer(roomId, guessAnswer) {
+    gameIO.to(roomId).emit('show guess answer', guessAnswer, true);
     endRound(roomId);
 }
 
-function onWrongAnswer(roomId) {
-    gameIO.to(roomId).emit('wrong answer');
+function onWrongAnswer(roomId, guessAnswer) {
+    gameIO.to(roomId).emit('show guess answer', guessAnswer, false);
 }
 
+function waitForTeammate(roomId) {
+    gameIO.to(roomId).emit('wait for teammate');
+    stopRoundTimer(roomId);
 
+}
 
 function endRound(roomId) {
     const currentIndex = answerIndex.get(roomId);
     const order = playerOrder.get(roomId);
-    stopRoundTimer(roomId);
-    showAnswer(order[0].id, currentIndex);
-    resetScreen(roomId);
-    restartRound(roomId, currentIndex);
+    if (order != undefined) {
+        stopRoundTimer(roomId);
+        showAnswer(order[0].id, currentIndex);
+        restartRound(roomId, currentIndex);
+    }
+
 }
 
 function showAnswer(socketId, currentIndex) {
     gameIO.to(socketId).emit('show answer', qBank[currentIndex]);
 }
 
-function resetScreen(roomId) {
-    gameIO.to(roomId).emit('reset screen');
-}
+// function resetScreen(roomId) {
+//     gameIO.to(roomId).emit('reset screen');
+// }
 
 
 function initRoundTimer(roomId) {
@@ -293,9 +314,12 @@ function updateGuesser(roomId) {
  */
 function switchToLast(roomId, index) {
     const order = playerOrder.get(roomId);
-    const pre = order[1]; //該user
-    order.splice(index, 1); //刪除該user
-    order.push(pre); //將該user插入到隊伍最後
+    if (order != undefined) {
+
+        const pre = order[index]; //該user
+        order.splice(index, 1); //刪除該user
+        order.push(pre); //將該user插入到隊伍最後
+    }
 }
 
 
@@ -363,9 +387,10 @@ gameIO.adapter.on("leave-room", (roomId, socketId) => {
             playerOrder.delete(roomId);
             answerIndex.delete(roomId);
             roundTime.delete(roomId);
+            turnTime.delete(roomId);
         } else if (info.playerCnt < 3) {
             stopRoundTimer(roomId);
-            gameIO.to(roomId).emit('wait for teammate');
+            waitForTeammate(roomId);
         } else {
             if (socketId === guesser.id) { //離開者為猜測者，則重開一round
                 endRound(roomId);
