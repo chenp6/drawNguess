@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { io } from "socket.io-client";
 import Board from './Board';
 import ProgressBar from './ProgressBar';
@@ -31,9 +31,11 @@ class Game extends React.Component {
   constructor(props) {
     super(props);
 
-    this.setStrokeColor = this.setStrokeColor.bind(this);
-    this.setStrokeWeight = this.setStrokeWeight.bind(this);
-    this.guessAnswer = this.guessAnswer.bind(this);
+    // this.setStrokeColor = this.setStrokeColor.bind(this);
+    // this.setStrokeWeight = this.setStrokeWeight.bind(this);
+    // this.guessAnswer = this.guessAnswer.bind(this);
+    // this.emitNewRecord = this.emitNewRecord.bind(this);
+    // this.guessAnswer = this.guessAnswer.bind(this);
     const url = "http://localhost:3001/game";
 
     this.socket = io.connect(url, {
@@ -53,6 +55,7 @@ class Game extends React.Component {
       'roundTime': 60,
       'progressBarSec': 0,
       'answer': '',
+      'clearBoard':false
     };
   }
 
@@ -72,7 +75,12 @@ class Game extends React.Component {
 
         {/* <div id="canvasSpace"> */}
         {/* <Toolbar roundTime={this.state.roundTime} strokeColor={this.state.strokeColor} strokeWeight={this.state.strokeWeight} setStrokeColor={this.setStrokeColor} setStrokeWeight={this.setStrokeWeight} undoState={this.onUndo} /> */}
-        <Board disable={this.state.disableToDraw} roundTime={this.state.roundTime} undrawedRecord={this.state.undrawedRecord} emitNewRecord={this.emitNewRecord} />
+        <Board disable={this.state.disableToDraw}
+                clear = {this.state.clearBoard}
+               roundTime={this.state.roundTime}
+               undrawedRecord={this.state.undrawedRecord}
+               emitNextTurn = {this.emitNextTurn}
+               emitNewRecord={this.emitNewRecord} />
         <ProgressBar counter={this.state.progressBarSec} turnProgress={this.state.turnProgress} />
         {/* </div> */}
       </div>
@@ -98,20 +106,28 @@ class Game extends React.Component {
 
     this.socket.on("wait for teammate", () => {
       this.setState({ 'answer': "" });
-      this.resetScreen();
+      this.resetRoundScreen();
       this.setState({ 'infoContent': "等待玩家進入。。。" });
     });
 
 
 
     this.socket.on('wait new round', () => {
-      this.setState({ 'infoContent': "開啟下一輪遊戲中~" });
+      this.resetRoundScreen();//除了answer、infoContent其他清空
+      this.setState({ 'infoContent': this.state.infoContent+"正在開啟下一輪遊戲。。。" });
+    });
+
+    this.socket.on('start new round', (guesserName) => {
+      this.setState({ 'infoContent': "" });
+      this.setState({ 'answer': "" });
+      this.setState({'clearBoard':false});
+      this.setState({ 'guesser': "猜題者：" + guesserName + "\u2003" });
+
     });
 
 
-    this.socket.on('reset screen', () => {
-      this.resetScreen();//除了answer其他清空
-    });
+    // this.socket.on('reset screen', () => {
+    // });
 
     this.socket.on("update round time", (time) => {
       const sec = Math.floor(time / 1000);
@@ -124,9 +140,9 @@ class Game extends React.Component {
 
 
     this.socket.on("update turn order", (order) => {
-      this.setState({ 'infoContent': "" });
-      const nameList = order.map(player => player.name);
-      this.setState({ 'guesser': "猜題者：" + nameList[0] + "\u2003" });
+      this.resetTurnScreen();
+      const nameList = order.map(player => player.name);  
+    
       this.setState({ 'drawer': "繪題者：" + nameList[1] + "\u2003" });
       nameList.splice(0, 1);//第0個為出題者不加入繪畫
       this.setState({ "drawOrder": "繪畫順序 : " + nameList.toString() });
@@ -134,12 +150,14 @@ class Game extends React.Component {
 
     this.socket.on("draw turn", () => {
       this.setState({ 'disableToDraw': false });
+      // console.log(username)
       this.setState({ 'drawer': "繪題者：" + username + "【You!!】" + "\u2003" });
     });
 
     this.socket.on("guess turn", () => {
       this.setState({ 'disableToGuess': false });
       this.setState({ 'guesser': "猜題者：" + username + "【You!!】\u2003" });
+      console.log("testing")
     });
 
     this.socket.on("show answer", (answer) => {
@@ -150,7 +168,7 @@ class Game extends React.Component {
       if(right){
         this.setState({ 'infoContent': "猜測者猜到了!!" + "\u2003" });
       }else{
-        this.setState({ 'infoContent': "猜測者猜"+guessAnswer + "\u2003" });
+        this.setState({ 'infoContent': "猜錯了!!猜測者猜"+guessAnswer + "\u2003" });
       }
     })
 
@@ -160,12 +178,14 @@ class Game extends React.Component {
     });
 
 
+    
+
   }
 
   /**
-   * 除了answer其他round screen物件清空
+   * 除了answer、infoContent其他round screen物件清空
    */
-  resetScreen = () => {
+  resetRoundScreen = () => {
     this.setState({ 'drawOrder': "" });
     this.setState({ 'drawer': "" });
     this.setState({ 'guesser': "" });
@@ -174,14 +194,27 @@ class Game extends React.Component {
     this.setState({ 'turnProgress': 0 });
     this.setState({ 'roundTime': 0 });
     this.setState({ 'progressBarSec': 0 });
+    this.setState({ 'clearBoard': true });
+
   }
+
+    /**
+   * turn screen物件清空
+   */
+     resetTurnScreen = () => {
+      this.setState({ 'disableToDraw': true });
+      this.setState({ 'turnProgress': 0 });
+    }
+  
+
+
 
   goBackgoBack = () => {
     window.location.href = 'https://www.youtube.com/watch?v=7VFTcmGRM-k';
   }
 
-  guessAnswer = () => {
-
+  guessAnswer = (answer) => {
+    this.socket.emit('guess answer', roomId, answer);
   }
   setStrokeColor = (color) => {
     console.log(color);
@@ -194,6 +227,15 @@ class Game extends React.Component {
 
   emitNewRecord = (record) => {
     this.socket.emit('draw record', record, roomId);
+  }
+
+  emitNextTurn = ()=>{
+    this.socket.emit('next turn', roomId);
+  }
+
+  emitNextRound = ()=>{
+    this.socket.emit('next round',roomId);
+
   }
 
   // progressCounter() {
@@ -215,14 +257,25 @@ class Game extends React.Component {
 
 export default Game;
 
-const AnswerBox = function (props) {
+const AnswerBox =  (props)=> {
   const [answerInput, setAnswerInput] = useState('');
+  useEffect(() => {//當被disable時清空答案欄
+    if(props.disable){
+      setAnswerInput("");
+    }
+  }, [props.disable]);
+  const submitAnswer = ()=>{
+    setAnswerInput("");
+    props.guessAnswer(answerInput) ;
+  }
   return (
     <div id="answerSpace">
-      <input id="answerInput" type="text" name="answer" readOnly={props.disable}
-        value={props.disableToGuess} onChange={(event) => setAnswerInput(event.target.value)}
+      <input id="answerInput" type="text" name="answer" readOnly={props.disable} value={answerInput}
+         onChange={(event) => setAnswerInput(event.target.value)}
       />
-      <button onClick={(e) => { props.guessAnswer() }}>送出</button>
+      <button onClick={() => {submitAnswer()}}>送出</button>
     </div>
   );
+
+
 }

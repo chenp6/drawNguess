@@ -4,10 +4,13 @@ import Sketch from "react-p5";
 
 
 
-let drawing = false;
 
-export default (props) => {
+const Canvas = (props) => {
     const [p5Api, setApi] = useState(null);
+    const [disableDraw, setDisableDraw] = useState(false);
+
+    //繪畫中，滑鼠按下後變為true，放開後變回false;
+    const [drawing, setDrawing] = useState(false);
 
     const setup = (p5, canvasParentRef) => {
         // use parent to render the canvas in this ref
@@ -24,6 +27,16 @@ export default (props) => {
         }
     }, [props.undrawedRecord]);
 
+    useEffect(() => {
+        setDisableDraw(props.disable);
+    }, [props.disable]);
+
+    useEffect(() => {
+        if (p5Api != null && props.undrawedRecord) {
+            p5Api.background(255);
+        }
+
+    }, [props.clear]);
 
     const draw = (p5) => {
 
@@ -35,13 +48,15 @@ export default (props) => {
         if (
             p5.mouseIsPressed &&
             p5.mouseButton === p5.LEFT &&
-            !props.disable &&
+            !disableDraw &&
             x >= 0 &&
             x <= props.width &&
             y >= 0 &&
             y <= props.height
         ) {
-            drawing = true;
+            if (!drawing) {
+                setDrawing(true);
+            }
             let position = [x, y, px, py];
             p5.strokeWeight(props.strokeWeight);
             p5.stroke(props.strokeColor);
@@ -67,6 +82,21 @@ export default (props) => {
         const position = record.position;
         p5.line(position.mouseX, position.mouseY, position.pMouseX, position.pMouseY);
     }
+
+    const mouseReleased = (p5) => {
+        if (drawing) {
+            setDrawing(false);
+            setDisableDraw(true);
+            props.emitNextTurn();
+        }
+    }
+
+    // function mousePressed() {
+    //     socket.emit('start clock')
+    //     startClock();
+    // }
+
+
 
     // function setStrokeColor(color) {
     //     strokeColor = color;
@@ -227,5 +257,8 @@ export default (props) => {
 
     return <Sketch setup = { setup }
     draw = { draw }
+    mouseReleased = { mouseReleased }
     />;
 };
+
+export default Canvas;
