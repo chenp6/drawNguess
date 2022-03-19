@@ -54,9 +54,10 @@ class Game extends React.Component {
       'turnProgress': 0,
       'roundTime': 60,
       'progressBarSec': 0,
-      'answer': '',
+      'roundAnswer': '',
       'clearBoard':false,
-      'isLastTurn':false
+      'isLastTurn':false,
+      'roomScore':0
     };
   }
 
@@ -69,7 +70,7 @@ class Game extends React.Component {
           <button style={{ marginLeft: "20px" }} onClick={() => { this.goBackgoBack() }}>不要按，很痛</button>
         </p>
         <div>
-          <p id="info" style={{ height: '10px' }}>{this.state.answer}{this.state.infoContent}</p>
+          <p id="info" style={{ height: '10px' }}>{this.state.roundAnswer}{this.state.infoContent}</p>
           <p id="order" style={{ height: '10px' }}>{this.state.guesser} {this.state.drawer} {this.state.drawOrder}</p>
         </div>
         <AnswerBox disable={this.state.disableToGuess} guessAnswer={this.guessAnswer} />
@@ -107,7 +108,7 @@ class Game extends React.Component {
     });
 
     this.socket.on("wait for teammate", () => {
-      this.setState({ 'answer': "" });
+      this.setState({ 'roundAnswer': "" });
       this.resetRoundScreen();
       this.setState({ 'infoContent': "等待玩家進入。。。" });
     });
@@ -121,10 +122,14 @@ class Game extends React.Component {
 
     this.socket.on('start new round', (guesserName) => {
       this.setState({ 'infoContent': "" });
-      this.setState({ 'answer': "" });
+      this.setState({ 'roundAnswer': "" });
       this.setState({'clearBoard':false});
       this.setState({ 'guesser': "猜題者：" + guesserName + "\u2003" });
 
+    });
+
+    this.socket.on('update score',(score)=>{
+      this.setState({ 'roomScore': score });
     });
 
 
@@ -141,11 +146,16 @@ class Game extends React.Component {
     });
 
 
-    this.socket.on("update turn order", (order) => {
+    this.socket.on("reset turn order", () => {
       this.resetTurnScreen();
+    });
+
+    this.socket.on("update turn order", (order) => {
       const nameList = order.map(player => player.name);  
-      this.setState({ 'drawer': "繪題者：" + nameList[1] + "\u2003" });
-      nameList.splice(0, 1);//第0個為出題者不加入繪畫
+      if(order[1].id!=this.socket.id){
+        this.setState({ 'drawer': "繪題者：" + nameList[1] + "\u2003" });
+      }
+      nameList.splice(0, 2);//第0個為出題者不加入繪畫
       this.setState({ "drawOrder": "繪畫順序 : " + nameList.toString() });
     });
 
@@ -154,7 +164,7 @@ class Game extends React.Component {
       this.setState({ 'isLastTurn': isLastTurn });
       const drawerContent = "繪題者：" + username + "【You!!】" + "\u2003";
       if(isLastTurn){
-        this.setState({ 'drawer': drawerContent+ "\u2003" +"【此輪最後一筆!!】"});
+        this.setState({ 'drawer': drawerContent +"【此輪最後一筆!!】\u2003"});
       }else{      
         this.setState({ 'drawer':drawerContent});
       }
@@ -164,11 +174,10 @@ class Game extends React.Component {
     this.socket.on("guess turn", () => {
       this.setState({ 'disableToGuess': false });
       this.setState({ 'guesser': "猜題者：" + username + "【You!!】\u2003" });
-      console.log("testing")
     });
 
     this.socket.on("show answer", (answer) => {
-      this.setState({ 'answer': "答案：" + answer + "\u2003" });
+      this.setState({ 'roundAnswer': "答案：" + answer + "\u2003" });
     });
 
     this.socket.on("show guess answer",(guessAnswer,right)=>{
