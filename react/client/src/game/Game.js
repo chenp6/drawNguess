@@ -55,7 +55,8 @@ class Game extends React.Component {
       'roundTime': 60,
       'progressBarSec': 0,
       'answer': '',
-      'clearBoard':false
+      'clearBoard':false,
+      'isLastTurn':false
     };
   }
 
@@ -79,6 +80,7 @@ class Game extends React.Component {
                 clear = {this.state.clearBoard}
                roundTime={this.state.roundTime}
                undrawedRecord={this.state.undrawedRecord}
+               isLastTurn={this.state.isLastTurn}
                emitNextTurn = {this.emitNextTurn}
                emitNewRecord={this.emitNewRecord} />
         <ProgressBar counter={this.state.progressBarSec} turnProgress={this.state.turnProgress} />
@@ -142,16 +144,21 @@ class Game extends React.Component {
     this.socket.on("update turn order", (order) => {
       this.resetTurnScreen();
       const nameList = order.map(player => player.name);  
-    
       this.setState({ 'drawer': "繪題者：" + nameList[1] + "\u2003" });
       nameList.splice(0, 1);//第0個為出題者不加入繪畫
       this.setState({ "drawOrder": "繪畫順序 : " + nameList.toString() });
     });
 
-    this.socket.on("draw turn", () => {
+    this.socket.on("draw turn", (isLastTurn) => {
       this.setState({ 'disableToDraw': false });
+      this.setState({ 'isLastTurn': isLastTurn });
+      const drawerContent = "繪題者：" + username + "【You!!】" + "\u2003";
+      if(isLastTurn){
+        this.setState({ 'drawer': drawerContent+ "\u2003" +"【此輪最後一筆!!】"});
+      }else{      
+        this.setState({ 'drawer':drawerContent});
+      }
       // console.log(username)
-      this.setState({ 'drawer': "繪題者：" + username + "【You!!】" + "\u2003" });
     });
 
     this.socket.on("guess turn", () => {
@@ -204,6 +211,7 @@ class Game extends React.Component {
      resetTurnScreen = () => {
       this.setState({ 'disableToDraw': true });
       this.setState({ 'turnProgress': 0 });
+      this.setState({'isLastTurn':false})
     }
   
 

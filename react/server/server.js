@@ -114,6 +114,8 @@ gameIO.on('connection', (socket) => {
 
 function showCurrentInfo(socketId, roomId) {
     const order = playerOrder.get(roomId);
+    const ansIndex = answerIndex.get(roomId);
+
     gameIO.to(socketId).emit('update turn order', order);
 
     gameIO.to(socketId).emit('start new round', order[0].name);
@@ -173,18 +175,19 @@ function startTurn(roomId) {
     }
     const playerCnt = roomInfo.get(roomId).playerCnt;
     const end = leftTime / (playerCnt - 1); //繪者人數為所有玩家人數-1
-    //當leftTime只剩下或更少於3秒時，此turn時間為leftTime>>>以3秒作為繪者最低limit
+
     console.log(leftTime + " " + playerCnt);
-    let isLast = false;
+    let isLastTurn = false;
     if (leftTime <= 3000) {
-        isLast = true;
+        isLastTurn = true;
         initTurnTimer(roomId, leftTime);
+    } else if (end <= 3000) { //&& leftTime>3000
+        initTurnTimer(roomId, 3000);
     } else {
         initTurnTimer(roomId, end);
     }
-
-    emitNewOrder(roomId);
-    turnTimer(roomId, isLast);
+    emitNewOrder(roomId, isLastTurn);
+    turnTimer(roomId, isLastTurn);
 }
 
 
@@ -207,7 +210,7 @@ function turnTimer(roomId, isLastTurn) {
         // console.log("here")
         stopTurnTimer(roomId);
         gameIO.to(order[1].id).emit('update turn time', 0, 1);
-        if (!isLast) { //若非最後一輪則restartTurn
+        if (!isLastTurn) { //若非最後一輪則restartTurn
             restartTurn(roomId);
         }
     } else {
@@ -222,10 +225,11 @@ function turnTimer(roomId, isLastTurn) {
     }
 }
 
-function emitNewOrder(roomId) {
+function emitNewOrder(roomId, isLastTurn) {
     const order = playerOrder.get(roomId);
     gameIO.to(roomId).emit('update turn order', order);
-    gameIO.to(order[1].id).emit('draw turn');
+    gameIO.to(order[1].id).emit('draw turn', isLastTurn);
+
 }
 
 

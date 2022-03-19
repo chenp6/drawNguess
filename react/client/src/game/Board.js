@@ -18,6 +18,7 @@ const Board = (props) => {
               width={1000} height={350} 
               strokeColor={strokeColor} 
               strokeWeight={strokeWeight} 
+              isLastTurn={props.isLastTurn}
               emitNextTurn = {props.emitNextTurn} />
         </div>
     );

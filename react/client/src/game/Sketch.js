@@ -87,7 +87,9 @@ const Canvas = (props) => {
         if (drawing) {
             setDrawing(false);
             setDisableDraw(true);
-            props.emitNextTurn();
+            if (!props.isLastTurn) { //最後一筆!則不再呼叫下一個turn
+                props.emitNextTurn();
+            }
         }
     }
 
