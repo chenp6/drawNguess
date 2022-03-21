@@ -66,7 +66,7 @@ class Game extends React.Component {
       <div className='Game'>
         <p style={{ height: '10px', margin: "0px" }}>
           <span>得分:</span>
-          <span id="score">0</span>
+          <span id="score">{this.state.roomScore}</span>
           <button style={{ marginLeft: "20px" }} onClick={() => { this.goBackgoBack() }}>不要按，很痛</button>
         </p>
         <div>
@@ -152,10 +152,10 @@ class Game extends React.Component {
 
     this.socket.on("update turn order", (order) => {
       const nameList = order.map(player => player.name);  
-      if(order[1].id!=this.socket.id){
+      if(order[0].id!=this.socket.id){
         this.setState({ 'drawer': "繪題者：" + nameList[1] + "\u2003" });
       }
-      nameList.splice(0, 2);//第0個為出題者不加入繪畫
+      nameList.splice(0, 1);//第0個為出題者不加入繪畫
       this.setState({ "drawOrder": "繪畫順序 : " + nameList.toString() });
     });
 
