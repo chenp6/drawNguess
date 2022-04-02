@@ -32,7 +32,7 @@ const Canvas = (props) => {
     }, [props.disable]);
 
     useEffect(() => {
-        if (p5Api != null && props.undrawedRecord) {
+        if (p5Api != null) {
             p5Api.background(255);
         }
 

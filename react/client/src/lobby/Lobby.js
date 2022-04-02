@@ -10,7 +10,7 @@ import './Lobby.css';
 
 const Lobby = () => {
   const [rooms, setRoom] = useState([]);
-  const [selectedId,selectId] = useState("custom");
+  const [selectedId,selectId] = useState("");
   const [customRoomName,inputRoomName] = useState("");
   const [username,setUsername] = useState("");
   const url = "http://localhost:3001/lobby";
@@ -67,7 +67,7 @@ const Lobby = () => {
         return;
     }
 
-    if (selectedId === undefined) { //未選擇房間
+    if (selectedId === "") { //未選擇房間
         alert('請選擇房間');
         return;
     } else if (selectedId === "custom") { //自建房間

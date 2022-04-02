@@ -110,7 +110,7 @@ class Game extends React.Component {
     this.socket.on("wait for teammate", () => {
       this.setState({ 'roundAnswer': "" });
       this.resetRoundScreen();
-      this.setState({ 'infoContent': "等待玩家進入。。。" });
+      this.setState({ 'infoContent': "等待玩家進入。。。\u2003" });
     });
 
 
@@ -153,7 +153,7 @@ class Game extends React.Component {
     this.socket.on("update turn order", (order) => {
       const nameList = order.map(player => player.name);  
       if(order[0].id!=this.socket.id){
-        this.setState({ 'drawer': "繪題者：" + nameList[1] + "\u2003" });
+        this.setState({ 'drawer': "繪題者：" + nameList[0] + "\u2003" });
       }
       nameList.splice(0, 1);//第0個為出題者不加入繪畫
       this.setState({ "drawOrder": "繪畫順序 : " + nameList.toString() });
@@ -184,7 +184,7 @@ class Game extends React.Component {
       if(right){
         this.setState({ 'infoContent': "猜測者猜到了!!" + "\u2003" });
       }else{
-        this.setState({ 'infoContent': "猜錯了!!猜測者猜"+guessAnswer + "\u2003" });
+        this.setState({ 'infoContent': "猜錯了!!\u00A0猜測者猜"+guessAnswer + "\u2003" });
       }
     })
 
