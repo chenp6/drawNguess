@@ -1,36 +1,30 @@
-import React from 'react';
+import React,{useEffect} from 'react';
 import './RoomContainer.css';
 
-class RoomContainer extends React.Component {
+const RoomContainer = (props) => {
+    useEffect(() => {
+        if(props.rooms.length>0){
+            const loadingBar = document.getElementById('loadingBar');
+            loadingBar.style.display = "none";
+        }
+    }, [props.rooms]);
 
+    return (
+        // room_window:捲軸容器
+        <div id="room_window">
 
-    render() {
-        return (
-            // room_window:捲軸容器
-            <div  id="room_window"> 
-                <div id="room_box">
-                        <b id="loadingBar">loading...</b>
-                        {/* <select id="roomSelector"> */}
+            <div id="room_box">
+            <span id="loadingBar"><b>loading...</b></span>
 
-                        {this.props.rooms}
-                        {/* </select> */}
-                        {/* <CustomRoom key="custom"/> */}
-                </div>
+                {props.rooms}
             </div>
-        )
-    }
+        </div>
+    )
 
 
 
-    componentDidMount(){
-       
-        // const a = React.Children.getElementById('roomContainer')
-        // const child = React.createElement("Room")
-        // a.appendChild(child)
-        const loadingBar = document.getElementById('loadingBar');
-        loadingBar.style.display = "none";
-        console.log("mounted!")
-    }
+
+
 }
 
 export default RoomContainer;

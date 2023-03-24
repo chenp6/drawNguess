@@ -1,34 +1,41 @@
 // import logo from './logo.svg';
 import React, { useState ,useEffect} from 'react';
-import { io } from "socket.io-client";
-
+import io from "socket.io-client";
 import RoomContainer from './RoomContainer';
 import Room from './Room';
 import CustomRoom from './CustomRoom';
 import './Lobby.css';
 
-
 const Lobby = () => {
+
   const [rooms, setRoom] = useState([]);
   const [selectedId,selectId] = useState("");
   const [customRoomName,inputRoomName] = useState("");
   const [username,setUsername] = useState("");
-  const url = "http://localhost:3001/lobby";
-
-  const socket=io.connect(url, { "transports": ['websocket'] });
 
 
-  useEffect(() => {
-    // setSocket(webSocket(url));
-    // // setSocket();
-    socket.on("connect", () => {
-      //連上線後node console 顯示 'this player connected'
-      console.log('this player connected');
-      socket.emit('load login page');//傳送load login畫面請求
-    });
-    socket.on('set login page', (roomInfo) => { //接收到login畫面資訊
-      setLoginPage(roomInfo);//依照畫面資訊(房間資訊)設定login畫面
-    });
+  const url = "http://192.168.1.37:57502/lobby";
+
+
+  const socket = io.connect(url, {
+    transports: ['websocket']
+  });
+
+
+
+  useEffect(() => { 
+
+        socket.on("connect", () => {
+          //連上線後node console 顯示 'this player connected'
+          console.log('this player connected');
+          socket.emit('load login page');//傳送load login畫面請求
+        });
+        socket.on('set login page', (roomInfo) => { //接收到login畫面資訊
+          setLoginPage(roomInfo);//依照畫面資訊(房間資訊)設定login畫面
+        });
+  
+        return () => socket.disconnect();
+
   },[]);
 
 
@@ -76,16 +83,15 @@ const Lobby = () => {
             alert('請輸入你的房間名稱');
             return;
         }
-        if(socket){
           socket.emit('add new room', roomId, customRoomName);
-        }
     } else { //進入他人房間
         roomId = selectedId;
     }
 
-    sessionStorage.setItem("room_id", roomId);
     sessionStorage.setItem("username", username);
-    window.location.href = './game';
+    sessionStorage.setItem("room_id", roomId);
+
+    window.location.href = './#/game';
 
   }
 

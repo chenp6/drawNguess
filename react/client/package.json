@@ -17,11 +17,12 @@
         "react-router-dom": "^6.2.1",
         "react-scripts": "4.0.3",
         "socket.io": "^4.4.1",
-        "socket.io-client": "^4.4.1",
+        "socket.io-client": "^4.5.0",
         "web-vitals": "^1.0.1"
     },
     "scripts": {
-        "start": "set PORT=3006 && react-scripts start",
+        "start": "cross-env PORT=57532 react-scripts start",
+        "local": "set PORT=57532 && react-scripts start",
         "build": "react-scripts build",
         "test": "react-scripts test",
         "eject": "react-scripts eject"
@@ -43,5 +44,6 @@
             "last 1 firefox version",
             "last 1 safari version"
         ]
-    }
+    },
+    "homepage": "."
 }

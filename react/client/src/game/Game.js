@@ -6,7 +6,7 @@ import './Game.css';
 /*
 遊戲規則說明:
 
-(1)每輪:123
+(1)每輪:
     a)時間為60秒
     b)一題題目
     c)一個猜題者，其他皆為繪畫者
@@ -20,9 +20,6 @@ import './Game.css';
     b)若輪到該繪畫者時，其右上角倒數計時器會開始從【該筆的時間限制】開始倒數  (該筆的時間限制:由該輪剩餘秒數平分決定)
 
 */
-const roomId = sessionStorage.getItem("room_id");
-const username = sessionStorage.getItem("username");
-
 
 
 
@@ -36,8 +33,10 @@ class Game extends React.Component {
     // this.guessAnswer = this.guessAnswer.bind(this);
     // this.emitNewRecord = this.emitNewRecord.bind(this);
     // this.guessAnswer = this.guessAnswer.bind(this);
-    const url = "http://localhost:3001/game";
-
+    const url = "http://192.168.1.37:57502/game";
+    this.roomId = sessionStorage.getItem("room_id");
+    this.username = sessionStorage.getItem("username");
+    
     this.socket = io.connect(url, {
       "transports": ['websocket']
     });
@@ -67,7 +66,6 @@ class Game extends React.Component {
         <p style={{ height: '10px', margin: "0px" }}>
           <span>得分:</span>
           <span id="score">{this.state.roomScore}</span>
-          <button style={{ marginLeft: "20px" }} onClick={() => { this.goBackgoBack() }}>不要按，很痛</button>
         </p>
         <div>
           <p id="info" style={{ height: '10px' }}>{this.state.roundAnswer}{this.state.infoContent}</p>
@@ -94,17 +92,20 @@ class Game extends React.Component {
     this.socket.on("connect", () => {
       //連上線後node console 顯示 'this device connected'
       console.log('this player connected');
-      this.socket.emit('enter room', roomId, username);
+      
+      console.log(this.roomId)
+      console.log(this.username)
+      this.socket.emit('enter room', this.roomId, this.username);
     });
 
     this.socket.on("room not exists", () => {
       alert("房間已不存在");
-      window.location.href = './lobby';
+      window.location.href = './#/';
     });
 
     this.socket.on("full seat", () => {
       alert("房間人數已滿");
-      window.location.href = './lobby';
+      window.location.href = './#/';
     });
 
     this.socket.on("wait for teammate", () => {
@@ -162,18 +163,18 @@ class Game extends React.Component {
     this.socket.on("draw turn", (isLastTurn) => {
       this.setState({ 'disableToDraw': false });
       this.setState({ 'isLastTurn': isLastTurn });
-      const drawerContent = "繪題者：" + username + "【You!!】" + "\u2003";
+      const drawerContent = "繪題者：" + this.username + "【You!!】" + "\u2003";
       if(isLastTurn){
         this.setState({ 'drawer': drawerContent +"【此輪最後一筆!!】\u2003"});
       }else{      
         this.setState({ 'drawer':drawerContent});
       }
-      // console.log(username)
+      // console.log(this.username)
     });
 
     this.socket.on("guess turn", () => {
       this.setState({ 'disableToGuess': false });
-      this.setState({ 'guesser': "猜題者：" + username + "【You!!】\u2003" });
+      this.setState({ 'guesser': "猜題者：" + this.username + "【You!!】\u2003" });
     });
 
     this.socket.on("show answer", (answer) => {
@@ -213,6 +214,7 @@ class Game extends React.Component {
     this.setState({ 'clearBoard': true });
 
   }
+  
 
     /**
    * turn screen物件清空
@@ -226,12 +228,9 @@ class Game extends React.Component {
 
 
 
-  goBackgoBack = () => {
-    window.location.href = 'https://www.youtube.com/watch?v=7VFTcmGRM-k';
-  }
 
   guessAnswer = (answer) => {
-    this.socket.emit('guess answer', roomId, answer);
+    this.socket.emit('guess answer', this.roomId, answer);
   }
   setStrokeColor = (color) => {
     console.log(color);
@@ -243,15 +242,15 @@ class Game extends React.Component {
   }
 
   emitNewRecord = (record) => {
-    this.socket.emit('draw record', record, roomId);
+    this.socket.emit('draw record', record, this.roomId);
   }
 
   emitNextTurn = ()=>{
-    this.socket.emit('next turn', roomId);
+    this.socket.emit('next turn', this.roomId);
   }
 
   emitNextRound = ()=>{
-    this.socket.emit('next round',roomId);
+    this.socket.emit('next round',this.roomId);
 
   }
 
@@ -282,13 +281,17 @@ const AnswerBox =  (props)=> {
     }
   }, [props.disable]);
   const submitAnswer = ()=>{
-    setAnswerInput("");
-    props.guessAnswer(answerInput) ;
+    if(!props.disable){
+      props.guessAnswer(answerInput) ;
+      setAnswerInput("");
+    }
   }
   return (
     <div id="answerSpace">
-      <input id="answerInput" type="text" name="answer" readOnly={props.disable} value={answerInput}
-         onChange={(event) => setAnswerInput(event.target.value)}
+      <input id="answerInput" type="text" name="answer" 
+      readOnly={props.disable} value={answerInput} 
+      onKeyDown={(event) => {if(event.key === 'Enter'){submitAnswer();}}}
+      onChange={(event) => setAnswerInput(event.target.value)}
       />
       <button onClick={() => {submitAnswer()}}>送出</button>
     </div>

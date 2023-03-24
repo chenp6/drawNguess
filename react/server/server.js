@@ -1,28 +1,36 @@
-const PORT = process.env.PORT || 3001;
 import express from 'express'; //載入express框架模組
-import http from 'http'; //載入http框架模組
+import https from 'https'; //載入http框架模組
 import path from 'path';
+import cors from 'cors';
+import fs from 'fs';
 const __dirname = path.resolve();
+const PORT = process.env.PORT;
 
 let app = express(); //Creates an Express application.
-let server = http.Server(app);
+// let server = https.Server(app);
+app.use(cors());
 
-app.use('/', express.static(__dirname));
+const options = {
+    key: fs.readFileSync("privkey.pem"),
+    cert: fs.readFileSync("cert.pem"),
+};
 
-
-
-server.listen(PORT, () => {
-    console.log("正在聽" + PORT);
+let server = https.createServer(options, app).listen(PORT, () => {
+    console.log("開始監聽port " + PORT);
 });
+
+
 
 import {
     Server
 } from 'socket.io';
 let io = new Server(server);
 
+
+
 const loginIO = io.of("/lobby"); //遊戲大廳IO
 const gameIO = io.of("/game"); //遊戲IO
-const qBank = ['銀行', '電風扇', '畫框', '冷氣', '腳踏車', '運動褲', '烘碗機', '皮蛋豆腐', '音樂家', '合唱團', '噴漆', '鋼琴', '書桌', '長笛', '抽油煙機', '直排輪', '布鞋', '按摩椅', '記憶卡', '火車', '計程車', '海螺', '作夢', '茶杯', '水壺', '炸蝦', '望遠鏡', '和室椅', '帥哥', '美女', '口罩', '紅酒', '菜瓜布', '書包', '洗手台', '壽司', '傘蜥', '鉛筆', '鏡子', '行李箱', '機車', '梳子', '棒球', '籃球', '音響', '', '耳機', '鍋子', '窗戶', '窗簾', '手槍', '面具', '獨角獸', '鍋燒意麵', '義大利麵', '油漆', '高鐵', '拖鞋', '遊艇', '毛巾', '月球', '地球', '外星人', '墨鏡', '高跟鞋', '果汁機', '電梯', '學校', '糖葫蘆', '拍立得', '運動飲料', '牛奶', '章魚', '白膠', '榕樹', '狗', '冰淇淋', '電磁爐', '手扶梯', '牛仔褲', '衣架', '同學', '相機', '鯊魚', '棉被', '枕頭', '螃蟹', '遙控器', '啤酒', '扁面蛸', '花園鰻', '眼罩', '課本', '鮭魚', '茶碗蒸', '電視節目', '玩偶', '鼓棒'];
+const qBank = ['銀行', '電風扇', '畫框', '冷氣', '腳踏車', '運動褲', '烘碗機', '皮蛋豆腐', '音樂家', '合唱團', '噴漆', '鋼琴', '書桌', '長笛', '抽油煙機', '直排輪', '布鞋', '按摩椅', '記憶卡', '火車', '計程車', '海螺', '作夢', '茶杯', '水壺', '炸蝦', '望遠鏡', '和室椅', '帥哥', '美女', '口罩', '紅酒', '菜瓜布', '書包', '洗手台', '壽司', '傘蜥', '鉛筆', '鏡子', '行李箱', '機車', '梳子', '棒球', '籃球', '音響', '土星', '耳機', '鍋子', '窗戶', '窗簾', '手槍', '面具', '獨角獸', '鍋燒意麵', '義大利麵', '油漆', '高鐵', '拖鞋', '遊艇', '毛巾', '月球', '地球', '外星人', '墨鏡', '高跟鞋', '果汁機', '電梯', '學校', '糖葫蘆', '拍立得', '運動飲料', '牛奶', '章魚', '白膠', '榕樹', '狗', '冰淇淋', '電磁爐', '手扶梯', '牛仔褲', '衣架', '同學', '相機', '鯊魚', '棉被', '枕頭', '螃蟹', '遙控器', '啤酒', '扁面蛸', '花園鰻', '眼罩', '課本', '鮭魚', '茶碗蒸', '貓頭鷹', '玩偶', '鼓棒', '鴨子', '蝦子', '犀牛', '月老', '鱷魚', '外套', '帳篷', '光碟', '大象', '蓮蓬頭', '垃圾', '檯燈', '羽毛球拍', '衛生紙', '籃子', '洋裝', '蜘蛛', '直升機', '襪子', '魚板', '內褲', '火爐', '流星', '玫瑰花', '炸豬排', '襪子', '披薩', '糖果', '巧克力派', '鬆餅', '牛排', '刀子', '雙節棍', '垃圾桶', '臉盆', '櫃子', '火箭', '串燒', '手電筒', '電視', '梯子', '門把', '海膽', '海星', '企鵝', '巧克力', '滑板', '沙發', '吊燈', '報紙', '鈕扣', '貓咪', '雨衣', '操場', '煙火', '草叢', '雞腿', '電影院', '蜘蛛人', '小提琴', '毛衣', '咖哩飯', '海灘球', '海灘', '機器人', '太陽', '香蕉', '蝴蝶', '地瓜球', '雨傘', '弓箭', '月亮', '燕窩', '滑鼠', '圖書館', '排球', '珍珠奶茶', '紅茶', '綠茶', '剪刀', '膠帶', '手帕', '風箏', '幽靈', '飛碟', '兔子', '長頸鹿', '天線寶寶', '甜甜圈', '恐龍', '烏龍茶', '櫻桃', '蓮霧', '獎盃', '酪梨', '地瓜', '手機', '電腦', '起司', '老鼠', '洋蔥', '蜂蜜', '蜜蜂', '白雲', '龍舟', '聖誕樹'];
 
 // const rooms = gameIO.adapter.rooms; //rooms: Map<Room, Set<SocketId>> //socketId=player
 
@@ -81,8 +89,10 @@ loginIO.on('connection', (socket) => {
 gameIO.on('connection', (socket) => {
     socket.on('enter room', (roomId, username) => {
         const room = roomInfo.get(roomId);
+        console.log(roomId)
         if (room === undefined) {
             socket.emit('room not exists');
+            console.log(room)
             return;
         }
         if (room.playerCnt < 6) {
@@ -166,9 +176,10 @@ function startRound(roomId, currentIndex = null) {
 
 function roundTimer(roomId, roundTimeout = null) {
     const time = roundTime.get(roomId); //目前時間
+
+    if (time == undefined) return;
     const current = time.current;
     const roundEnd = time.roundEnd;
-    if (current == undefined) return;
     if (current >= roundEnd) { //當current >= roundEnd時，結束此輪。(包括當roundEnd=-1)
         if (roundTimeout != null) {
             clearTimeout(roundTimeout);
@@ -219,13 +230,15 @@ function startTurn(roomId) {
 
 
 function turnTimer(roomId, isLastTurn, turnTimeout = null) {
-    const round = roundTime.get(roomId).current;
+    const round = roundTime.get(roomId);
+    if (round == undefined) return;
+    const roundEnd = roundTime.get(roomId).roundEnd;
     const turn = turnTime.get(roomId);
 
     if (turn == undefined) {
         return;
     }
-    if (round == -1 || round == undefined) {
+    if (roundEnd == -1 || roundEnd == undefined) {
         //round已停止
         return;
     }
@@ -244,7 +257,7 @@ function turnTimer(roomId, isLastTurn, turnTimeout = null) {
             restartTurn(roomId);
         }
     } else {
-        if (drawers.length >= 3) {
+        if (drawers.length >= 2) {
             gameIO.to(drawers[0].id).emit('update turn time', current, turnEnd);
         }
         const tT = setTimeout(() => {
@@ -319,7 +332,9 @@ function initRoundTimer(roomId) {
 
 function stopRoundTimer(roomId) { //當round結束時roundEnd設為-1
     const time = roundTime.get(roomId);
-    time.roundEnd = -1;
+    if (time != undefined) {
+        time.roundEnd = -1;
+    }
 }
 
 

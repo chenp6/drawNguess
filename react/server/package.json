@@ -3,13 +3,17 @@
     "version": "1.0.0",
     "main": "server.js",
     "dependencies": {
+        "cors": "^2.8.5",
         "express": "^4.17.3",
+        "fs": "0.0.1-security",
+        "https": "^1.0.0",
         "socket.io": "^4.4.1"
     },
     "devDependencies": {},
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "start": "node server.js"
+        "start": "cross-env PORT=57502 node server.js",
+        "local": "set PORT=57502 && node server_localUse.js"
     },
     "author": "",
     "license": "ISC",
